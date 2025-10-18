@@ -1,0 +1,759 @@
+<!DOCTYPE html>
+<html lang="ms">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Mama Bijak Susu Ibu - Kuiz Interaktif</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <style>
+        body {
+            box-sizing: border-box;
+        }
+        
+        .confetti {
+            position: absolute;
+            width: 10px;
+            height: 10px;
+            background: #f39c12;
+            animation: confetti-fall 3s linear infinite;
+        }
+        
+        .confetti:nth-child(odd) {
+            background: #e74c3c;
+            width: 8px;
+            height: 8px;
+            animation-duration: 2.5s;
+        }
+        
+        .confetti:nth-child(even) {
+            animation-duration: 3.5s;
+        }
+        
+        @keyframes confetti-fall {
+            0% {
+                transform: translateY(-100vh) rotate(0deg);
+                opacity: 1;
+            }
+            100% {
+                transform: translateY(100vh) rotate(720deg);
+                opacity: 0;
+            }
+        }
+        
+        .fade-in {
+            animation: fadeIn 0.5s ease-in;
+        }
+        
+        @keyframes fadeIn {
+            from { opacity: 0; transform: translateY(20px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+        
+        .pulse-correct {
+            animation: pulseCorrect 0.6s ease-in-out;
+        }
+        
+        .pulse-wrong {
+            animation: pulseWrong 0.6s ease-in-out;
+        }
+        
+        @keyframes pulseCorrect {
+            0% { transform: scale(1); }
+            50% { transform: scale(1.05); background-color: #10b981; }
+            100% { transform: scale(1); }
+        }
+        
+        @keyframes pulseWrong {
+            0% { transform: scale(1); }
+            50% { transform: scale(1.05); background-color: #ef4444; }
+            100% { transform: scale(1); }
+        }
+        
+        .exit-button {
+            position: relative;
+            box-shadow: 0 8px 15px rgba(239, 68, 68, 0.3), 0 4px 6px rgba(0, 0, 0, 0.1);
+            transform: translateY(0);
+            transition: all 0.3s cubic-bezier(0.68, -0.55, 0.265, 1.55);
+        }
+        
+        .exit-button:hover {
+            animation: jelly 0.6s ease-in-out;
+            box-shadow: 0 12px 25px rgba(239, 68, 68, 0.4), 0 6px 12px rgba(0, 0, 0, 0.15);
+            transform: translateY(-2px);
+        }
+        
+        .exit-button:active {
+            transform: translateY(4px);
+            box-shadow: 0 2px 8px rgba(239, 68, 68, 0.2), 0 1px 3px rgba(0, 0, 0, 0.1);
+        }
+        
+        @keyframes jelly {
+            0% { transform: translateY(-2px) scale(1); }
+            25% { transform: translateY(-2px) scale(1.05, 0.95); }
+            50% { transform: translateY(-2px) scale(0.95, 1.05); }
+            75% { transform: translateY(-2px) scale(1.02, 0.98); }
+            100% { transform: translateY(-2px) scale(1); }
+        }
+    </style>
+</head>
+<body class="bg-gradient-to-br from-pink-50 to-blue-50 min-h-full">
+    <main class="container mx-auto px-3 py-4 max-w-lg">
+        <!-- Home Screen -->
+        <div id="homeScreen" class="text-center fade-in">
+            <div class="bg-white rounded-3xl shadow-xl p-4 mb-4">
+                <!-- Logo -->
+                <div class="mb-4">
+                    <div class="text-4xl mb-3">👩‍🍼</div>
+                    <h1 class="text-2xl font-bold text-pink-600 mb-2">Mama Bijak Susu Ibu</h1>
+                    <div class="flex justify-center items-center gap-2 text-xl mb-3">
+                        <span>💝</span>
+                        <span>👶</span>
+                        <span>🤱</span>
+                        <span>💕</span>
+                    </div>
+                </div>
+                
+                <!-- Welcome Message -->
+                <div class="bg-gradient-to-r from-pink-100 to-blue-100 rounded-2xl p-4 mb-4">
+                    <p class="text-base text-gray-700 font-medium">
+                        Main sambil menunggu giliran, tambah ilmu penyusuan! 
+                    </p>
+                    <p class="text-xs text-gray-600 mt-2">
+                        10 soalan • Markah maksimum 100 • Hadiah untuk skor tinggi! 🎁
+                    </p>
+                </div>
+                
+                <!-- Start Button -->
+                <button id="startBtn" class="bg-gradient-to-r from-pink-500 to-pink-600 hover:from-pink-600 hover:to-pink-700 text-white font-bold py-3 px-6 rounded-2xl text-lg shadow-lg transform hover:scale-105 transition-all duration-200 w-full">
+                    🎯 MULA PERMAINAN
+                </button>
+            </div>
+        </div>
+
+        <!-- Quiz Screen -->
+        <div id="quizScreen" class="hidden">
+            <!-- Progress Bar -->
+            <div class="bg-white rounded-2xl shadow-lg p-3 mb-3">
+                <div class="flex justify-between items-center mb-2 text-xs">
+                    <span class="font-medium text-gray-600">Soalan <span id="currentQ">1</span>/10</span>
+                    <span class="font-medium text-pink-600">Markah: <span id="currentScore">0</span></span>
+                    <div class="flex items-center gap-1">
+                        <span class="text-lg">⏰</span>
+                        <span id="timer" class="text-sm font-bold text-red-600">10</span>
+                    </div>
+                </div>
+                <div class="w-full bg-gray-200 rounded-full h-2">
+                    <div id="progressBar" class="bg-gradient-to-r from-pink-500 to-blue-500 h-2 rounded-full transition-all duration-300" style="width: 10%"></div>
+                </div>
+            </div>
+
+            <!-- Question Card -->
+            <div class="bg-white rounded-3xl shadow-xl p-4 mb-4 fade-in">
+                <div class="text-center mb-4">
+                    <div class="text-3xl mb-2">🤔</div>
+                    <h2 id="questionText" class="text-base font-bold text-gray-800 leading-relaxed"></h2>
+                </div>
+
+                <!-- Answer Options -->
+                <div id="answerOptions" class="space-y-2">
+                    <!-- Options will be populated by JavaScript -->
+                </div>
+            </div>
+        </div>
+
+        <!-- Results Screen -->
+        <div id="resultsScreen" class="hidden text-center">
+            <div class="bg-white rounded-3xl shadow-xl p-4">
+                <div id="resultsContent">
+                    <!-- Results will be populated by JavaScript -->
+                </div>
+                
+                <div class="flex flex-col gap-3 justify-center mt-6">
+                    <button id="playAgainBtn" class="bg-gradient-to-r from-pink-500 to-pink-600 hover:from-pink-600 hover:to-pink-700 text-white font-bold py-3 px-4 rounded-2xl shadow-lg transform hover:scale-105 transition-all duration-200 text-sm">
+                        🔄 Main Semula
+                    </button>
+                    <button id="factsBtn" class="bg-gradient-to-r from-blue-500 to-blue-600 hover:from-blue-600 hover:to-blue-700 text-white font-bold py-3 px-4 rounded-2xl shadow-lg transform hover:scale-105 transition-all duration-200 text-sm">
+                        📚 Lihat Fakta Susu Ibu
+                    </button>
+                    <button id="exitBtn" class="exit-button bg-gradient-to-r from-red-500 to-red-600 text-white font-bold py-3 px-4 rounded-2xl text-sm">
+                        🚪 Keluar dari Permainan
+                    </button>
+                </div>
+            </div>
+        </div>
+
+        <!-- Facts Screen -->
+        <div id="factsScreen" class="hidden">
+            <div class="bg-white rounded-3xl shadow-xl p-4">
+                <div class="text-center mb-4">
+                    <div class="text-3xl mb-2">📚</div>
+                    <h2 class="text-lg font-bold text-blue-600 mb-3">Fakta Penting Susu Ibu</h2>
+                </div>
+                
+                <div class="space-y-3 text-left">
+                    <div class="bg-pink-50 rounded-2xl p-3">
+                        <h3 class="font-bold text-pink-700 mb-2 text-sm">🌟 Kelebihan untuk Bayi:</h3>
+                        <ul class="text-xs text-gray-700 space-y-1">
+                            <li>• Mengandungi antibodi untuk melindungi dari jangkitan</li>
+                            <li>• Mudah dicerna dan diserap</li>
+                            <li>• Mengurangkan risiko alahan dan asma</li>
+                        </ul>
+                    </div>
+                    
+                    <div class="bg-blue-50 rounded-2xl p-3">
+                        <h3 class="font-bold text-blue-700 mb-2 text-sm">💪 Kelebihan untuk Ibu:</h3>
+                        <ul class="text-xs text-gray-700 space-y-1">
+                            <li>• Membantu rahim kembali ke saiz asal</li>
+                            <li>• Mengurangkan risiko kanser payudara</li>
+                            <li>• Membakar kalori tambahan</li>
+                        </ul>
+                    </div>
+                    
+                    <div class="bg-green-50 rounded-2xl p-3">
+                        <h3 class="font-bold text-green-700 mb-2 text-sm">⏰ Panduan Penyusuan:</h3>
+                        <ul class="text-xs text-gray-700 space-y-1">
+                            <li>• Susukan eksklusif selama 6 bulan pertama</li>
+                            <li>• Susukan mengikut kehendak bayi (on demand)</li>
+                            <li>• Pastikan pelekatan yang betul</li>
+                        </ul>
+                    </div>
+                </div>
+                
+                <div class="text-center mt-4">
+                    <button id="backToResultsBtn" class="bg-gradient-to-r from-gray-500 to-gray-600 hover:from-gray-600 hover:to-gray-700 text-white font-bold py-3 px-4 rounded-2xl shadow-lg transform hover:scale-105 transition-all duration-200 text-sm w-full">
+                        ← Kembali ke Keputusan
+                    </button>
+                </div>
+            </div>
+        </div>
+
+        <!-- Timeout Warning Popup -->
+        <div id="timeoutPopup" class="hidden fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50 px-4">
+            <div class="bg-white rounded-3xl shadow-xl p-6 text-center max-w-sm w-full">
+                <div class="text-4xl mb-3">⚠️</div>
+                <h3 class="text-lg font-bold text-red-600 mb-3">Masa Tamat!</h3>
+                <p class="text-sm text-gray-700 font-medium">
+                    Anda tidak memberi sebarang jawapan.
+                </p>
+            </div>
+        </div>
+    </main>
+
+    <script>
+        // Questions bank from user's collection
+        const questionsBank = [
+            // Bahagian 1: Kelebihan Susu Ibu untuk Bayi (10 soalan)
+            {
+                question: "Susu ibu mengandungi antibodi yang membantu bayi melawan:",
+                options: ["Rasa lapar", "Jangkitan dan penyakit", "Panas badan", "Selsema biasa sahaja"],
+                correct: 1
+            },
+            {
+                question: "Bayi yang disusui dengan susu ibu sepenuhnya lebih:",
+                options: ["Kerap sakit", "Cepat lapar", "Sihat dan kuat antibodi", "Sukar tidur"],
+                correct: 2
+            },
+            {
+                question: "Susu ibu membantu perkembangan:",
+                options: ["Kuku bayi", "Tulang dan otot sahaja", "Otak dan sistem imun bayi", "Hanya berat badan"],
+                correct: 2
+            },
+            {
+                question: "Kolostrum ialah:",
+                options: ["Susu pertama berwarna kuning yang kaya antibodi", "Susu basi", "Susu formula khas", "Air biasa"],
+                correct: 0
+            },
+            {
+                question: "Bayi yang mendapat susu ibu sepenuhnya jarang mengalami:",
+                options: ["Cirit-birit", "Nafsu makan tinggi", "Kenaikan berat badan cepat", "Tidur lama"],
+                correct: 0
+            },
+            {
+                question: "Susu ibu mudah dihadam kerana:",
+                options: ["Mengandungi serat tinggi", "Sesuai dengan sistem pencernaan bayi", "Tidak mengandungi lemak", "Dipanaskan dahulu"],
+                correct: 1
+            },
+            {
+                question: "Susu ibu memberi perlindungan awal terhadap:",
+                options: ["Diabetes", "Sakit jantung", "Jangkitan pernafasan dan usus", "Alahan kulit"],
+                correct: 2
+            },
+            {
+                question: "Bayi yang menyusu badan mempunyai hubungan lebih rapat dengan:",
+                options: ["Jururawat", "Ibu", "Ayah", "Doktor"],
+                correct: 1
+            },
+            {
+                question: "Penyusuan susu ibu membantu bayi berkembang secara:",
+                options: ["Fizikal dan emosi", "Fizikal sahaja", "Mental sahaja", "Sosial sahaja"],
+                correct: 0
+            },
+            {
+                question: "Susu ibu tidak perlu disterilkan kerana:",
+                options: ["Ia sentiasa segar dan bersih dari tubuh ibu", "Ia berasid", "Ia berperisa manis", "Ia tahan panas"],
+                correct: 0
+            },
+
+            // Bahagian 2: Kelebihan Susu Ibu untuk Ibu (5 soalan)
+            {
+                question: "Menyusukan bayi membantu rahim ibu:",
+                options: ["Mengecut lebih cepat selepas bersalin", "Membesar semula", "Tidak berubah", "Menjadi longgar"],
+                correct: 0
+            },
+            {
+                question: "Penyusuan membantu ibu mengurangkan risiko:",
+                options: ["Kanser payudara dan ovari", "Demam", "Migrain", "Gastrik"],
+                correct: 0
+            },
+            {
+                question: "Ibu yang menyusu badan lebih cepat:",
+                options: ["Letih", "Pulih daripada kelahiran", "Lapar", "Gemuk"],
+                correct: 1
+            },
+            {
+                question: "Penyusuan badan dapat menjimatkan:",
+                options: ["Masa dan wang", "Ruang dapur", "Air paip", "Elektrik"],
+                correct: 0
+            },
+            {
+                question: "Hormon oksitosin ketika menyusu membantu ibu:",
+                options: ["Tidur lebih nyenyak", "Hilang selera makan", "Mudah marah", "Haus berpanjangan"],
+                correct: 0
+            },
+
+            // Bahagian 3: Panduan Penyusuan Betul (10 soalan)
+            {
+                question: "Tempoh penyusuan eksklusif disyorkan KKM ialah:",
+                options: ["3 bulan", "6 bulan", "9 bulan", "12 bulan"],
+                correct: 1
+            },
+            {
+                question: "Penyusuan eksklusif bermaksud:",
+                options: ["Hanya susu ibu tanpa makanan atau minuman lain", "Susu ibu dan air kosong", "Susu ibu dan jus buah", "Susu ibu bersama madu"],
+                correct: 0
+            },
+            {
+                question: "Kedudukan penyusuan yang betul ialah:",
+                options: ["Bayi menghadap jauh dari ibu", "Mulut bayi terbuka luas ke arah puting", "Bayi hanya menyedut puting", "Bayi baring terbalik"],
+                correct: 1
+            },
+            {
+                question: "Tanda bayi menyusu dengan betul ialah:",
+                options: ["Puting terasa sakit", "Tiada bunyi hisapan", "Dagu bayi menyentuh payudara ibu", "Bayi cepat menangis"],
+                correct: 2
+            },
+            {
+                question: "Frekuensi penyusuan disarankan ialah:",
+                options: ["Sekali sehari", "Bila-bila bayi mahu (on demand)", "Setiap 12 jam", "Hanya waktu pagi"],
+                correct: 1
+            },
+            {
+                question: "Ibu perlu menyusu dari kedua-dua belah payudara untuk:",
+                options: ["Mengelak bengkak dan meningkatkan pengeluaran susu", "Mengecilkan dada", "Menyejukkan badan", "Menurunkan suhu"],
+                correct: 0
+            },
+            {
+                question: "Bayi kenyang biasanya akan:",
+                options: ["Menangis kuat", "Melepaskan puting sendiri", "Menghisap kuat tanpa henti", "Menjerit"],
+                correct: 1
+            },
+            {
+                question: "Bayi perlu disendawakan selepas menyusu untuk:",
+                options: ["Menarik perhatian", "Mengeluarkan angin dalam perut", "Menguatkan paru-paru", "Menguji suara"],
+                correct: 1
+            },
+            {
+                question: "Penyusuan pada waktu malam membantu:",
+                options: ["Meningkatkan pengeluaran susu", "Mengurangkan tenaga ibu", "Menyebabkan bayi batuk", "Mengganggu tidur bayi"],
+                correct: 0
+            },
+            {
+                question: "Ibu dinasihatkan terus menyusu walaupun bayi sedikit demam:",
+                options: ["Betul", "Salah"],
+                correct: 0
+            },
+
+            // Bahagian 4: Penyimpanan Susu Perahan (5 soalan)
+            {
+                question: "Susu perahan boleh disimpan dalam peti sejuk beku selama:",
+                options: ["3 hari", "2 minggu", "3 bulan", "1 tahun"],
+                correct: 2
+            },
+            {
+                question: "Susu perahan perlu disimpan dalam:",
+                options: ["Bekas kaca atau plastik bertutup rapat", "Cawan terbuka", "Balang logam", "Botol air mineral"],
+                correct: 0
+            },
+            {
+                question: "Susu perahan yang cair perlu:",
+                options: ["Dipanaskan atas api", "Direndam dalam air suam", "Dibiarkan di bawah cahaya matahari", "Dipanaskan dalam microwave"],
+                correct: 1
+            },
+            {
+                question: "Sebelum memberi susu perahan kepada bayi:",
+                options: ["Goncang kuat", "Goncang perlahan supaya lemak sebati", "Tuang terus tanpa periksa", "Tambah air panas"],
+                correct: 1
+            },
+            {
+                question: "Susu yang telah dipanaskan:",
+                options: ["Boleh dibekukan semula", "Tidak boleh dibekukan semula"],
+                correct: 1
+            },
+
+            // Bahagian 5: Mitos dan Salah Faham (5 soalan)
+            {
+                question: "Susu ibu cair berwarna jernih bermaksud susu itu tidak berkhasiat:",
+                options: ["Betul", "Salah"],
+                correct: 1
+            },
+            {
+                question: "Ibu yang demam masih boleh menyusu bayi:",
+                options: ["Betul", "Salah"],
+                correct: 0
+            },
+            {
+                question: "Susu ibu tidak cukup jika bayi menangis:",
+                options: ["Betul", "Salah"],
+                correct: 1
+            },
+            {
+                question: "Menyusu akan merosakkan bentuk payudara:",
+                options: ["Betul", "Salah"],
+                correct: 1
+            },
+            {
+                question: "Ibu yang bekerja tidak boleh menyusukan bayi:",
+                options: ["Betul", "Salah"],
+                correct: 1
+            },
+
+            // Bahagian 6: Masalah Biasa Semasa Penyusuan (5 soalan)
+            {
+                question: "Bengkak susu berlaku kerana:",
+                options: ["Menyusu terlalu lama", "Susu tidak dikeluarkan sepenuhnya", "Bayi tidur lama", "Cuaca panas"],
+                correct: 1
+            },
+            {
+                question: "Cara terbaik mengurangkan bengkak susu ialah:",
+                options: ["Menyusu kerap dan tuam suam", "Tekan kuat payudara", "Elak menyusu", "Ambil ubat tahan sakit sahaja"],
+                correct: 0
+            },
+            {
+                question: "Puting luka boleh berlaku kerana:",
+                options: ["Penyusuan tidak betul", "Susu terlalu banyak", "Bayi kuat menangis", "Tekanan emosi"],
+                correct: 0
+            },
+            {
+                question: "Jika susu berkurang, ibu perlu:",
+                options: ["Menyusu lebih kerap", "Mengurangkan air minum", "Elak makanan berlemak", "Tidur lebih lama"],
+                correct: 0
+            },
+            {
+                question: "Ibu perlu berjumpa jururawat jika:",
+                options: ["Rasa sakit berterusan semasa menyusu", "Bayi tidur terlalu lama", "Bayi menangis selepas mandi", "Tiada perubahan berat badan ibu"],
+                correct: 0
+            },
+
+            // Bahagian 7: Pemakanan Ibu Menyusu (5 soalan)
+            {
+                question: "Ibu menyusu perlu makan:",
+                options: ["Diet seimbang dan minum air secukupnya", "Makanan segera", "Makanan manis sahaja", "Kurangkan sayur"],
+                correct: 0
+            },
+            {
+                question: "Ibu menyusu digalakkan minum:",
+                options: ["Air kosong", "Kopi berlebihan", "Air bergas", "Teh pekat"],
+                correct: 0
+            },
+            {
+                question: "Vitamin dan mineral penting untuk:",
+                options: ["Tenaga dan penghasilan susu", "Menggemukkan bayi", "Mengurangkan susu", "Mengurangkan lapar"],
+                correct: 0
+            },
+            {
+                question: "Ibu menyusu tidak digalakkan merokok kerana:",
+                options: ["Nikotin masuk ke dalam susu ibu", "Menambah tenaga", "Tiada kesan", "Boleh mengurangkan tekanan"],
+                correct: 0
+            },
+            {
+                question: "Ibu menyusu perlu makan makanan tambahan hanya:",
+                options: ["Jika disyorkan oleh doktor", "Jika mahu sahaja", "Bila lapar", "Setiap hari tanpa nasihat"],
+                correct: 0
+            },
+
+            // Bahagian 8: Fakta Umum Penyusuan Eksklusif (5 soalan)
+            {
+                question: "Penyusuan eksklusif bermaksud hanya susu ibu selama:",
+                options: ["6 bulan pertama", "3 bulan pertama", "1 tahun", "2 bulan"],
+                correct: 0
+            },
+            {
+                question: "Selepas 6 bulan, bayi boleh mula:",
+                options: ["Makan makanan pejal lembut sambil terus menyusu", "Berhenti menyusu", "Hanya minum air kosong", "Minum susu formula sahaja"],
+                correct: 0
+            },
+            {
+                question: "Penyusuan perlu diteruskan sehingga bayi berumur:",
+                options: ["2 tahun atau lebih", "1 tahun sahaja", "6 bulan", "3 tahun"],
+                correct: 0
+            },
+            {
+                question: "Susu ibu mengandungi nutrien yang:",
+                options: ["Berubah mengikut keperluan bayi", "Sentiasa sama", "Berkurang setiap hari", "Tidak berguna selepas 6 bulan"],
+                correct: 0
+            },
+            {
+                question: "Bayi menyusu lebih lama pada satu payudara kerana:",
+                options: ["Bahagian akhir susu lebih berlemak dan mengenyangkan", "Payudara kiri lebih besar", "Hanya suka rasa itu", "Bayi tidak lapar"],
+                correct: 0
+            }
+        ];
+
+        // Game state
+        let currentQuestions = [];
+        let currentQuestionIndex = 0;
+        let score = 0;
+        let selectedQuestions = [];
+        let questionTimer = null;
+        let timeLeft = 10;
+
+        // DOM elements
+        const homeScreen = document.getElementById('homeScreen');
+        const quizScreen = document.getElementById('quizScreen');
+        const resultsScreen = document.getElementById('resultsScreen');
+        const factsScreen = document.getElementById('factsScreen');
+        const startBtn = document.getElementById('startBtn');
+        const playAgainBtn = document.getElementById('playAgainBtn');
+        const factsBtn = document.getElementById('factsBtn');
+        const backToResultsBtn = document.getElementById('backToResultsBtn');
+        const exitBtn = document.getElementById('exitBtn');
+
+        // Initialize game
+        function initGame() {
+            // Clear any existing timer
+            if (questionTimer) {
+                clearInterval(questionTimer);
+            }
+            
+            // Select 10 random questions
+            selectedQuestions = getRandomQuestions(10);
+            currentQuestionIndex = 0;
+            score = 0;
+            timeLeft = 10;
+            showScreen('quiz');
+            displayQuestion();
+        }
+
+        function getRandomQuestions(count) {
+            const shuffled = [...questionsBank].sort(() => 0.5 - Math.random());
+            return shuffled.slice(0, count);
+        }
+
+        function showScreen(screen) {
+            homeScreen.classList.add('hidden');
+            quizScreen.classList.add('hidden');
+            resultsScreen.classList.add('hidden');
+            factsScreen.classList.add('hidden');
+
+            switch(screen) {
+                case 'home':
+                    homeScreen.classList.remove('hidden');
+                    break;
+                case 'quiz':
+                    quizScreen.classList.remove('hidden');
+                    break;
+                case 'results':
+                    resultsScreen.classList.remove('hidden');
+                    break;
+                case 'facts':
+                    factsScreen.classList.remove('hidden');
+                    break;
+            }
+        }
+
+        function displayQuestion() {
+            const question = selectedQuestions[currentQuestionIndex];
+            const progress = ((currentQuestionIndex + 1) / 10) * 100;
+            
+            document.getElementById('currentQ').textContent = currentQuestionIndex + 1;
+            document.getElementById('currentScore').textContent = score;
+            document.getElementById('progressBar').style.width = progress + '%';
+            document.getElementById('questionText').textContent = question.question;
+            
+            const optionsContainer = document.getElementById('answerOptions');
+            optionsContainer.innerHTML = '';
+            
+            question.options.forEach((option, index) => {
+                const button = document.createElement('button');
+                button.className = 'w-full text-left p-3 rounded-2xl border-2 border-gray-200 hover:border-pink-300 hover:bg-pink-50 transition-all duration-200 font-medium text-sm';
+                button.innerHTML = `<span class="font-bold text-pink-600">${String.fromCharCode(65 + index)}.</span> ${option}`;
+                button.onclick = () => selectAnswer(index, button);
+                optionsContainer.appendChild(button);
+            });
+
+            // Start 10-second timer
+            startQuestionTimer();
+        }
+
+        function startQuestionTimer() {
+            timeLeft = 10;
+            updateTimerDisplay();
+            
+            questionTimer = setInterval(() => {
+                timeLeft--;
+                updateTimerDisplay();
+                
+                if (timeLeft <= 0) {
+                    clearInterval(questionTimer);
+                    handleTimeout();
+                }
+            }, 1000);
+        }
+
+        function updateTimerDisplay() {
+            const timerElement = document.getElementById('timer');
+            timerElement.textContent = timeLeft;
+            
+            // Change color based on time left
+            if (timeLeft <= 3) {
+                timerElement.className = 'text-lg font-bold text-red-600 animate-pulse';
+            } else if (timeLeft <= 5) {
+                timerElement.className = 'text-lg font-bold text-orange-600';
+            } else {
+                timerElement.className = 'text-lg font-bold text-green-600';
+            }
+        }
+
+        function handleTimeout() {
+            // Disable all buttons
+            const allButtons = document.querySelectorAll('#answerOptions button');
+            allButtons.forEach(btn => btn.disabled = true);
+            
+            // Show timeout popup
+            showTimeoutPopup();
+            
+            // Move to next question after popup disappears
+            setTimeout(() => {
+                currentQuestionIndex++;
+                if (currentQuestionIndex < 10) {
+                    displayQuestion();
+                } else {
+                    showResults();
+                }
+            }, 2000);
+        }
+
+        function showTimeoutPopup() {
+            const popup = document.getElementById('timeoutPopup');
+            popup.classList.remove('hidden');
+            
+            // Hide popup after 2 seconds
+            setTimeout(() => {
+                popup.classList.add('hidden');
+            }, 2000);
+        }
+
+        function selectAnswer(selectedIndex, buttonElement) {
+            // Stop the timer when answer is selected
+            clearInterval(questionTimer);
+            
+            const question = selectedQuestions[currentQuestionIndex];
+            const isCorrect = selectedIndex === question.correct;
+            
+            // Disable all buttons
+            const allButtons = document.querySelectorAll('#answerOptions button');
+            allButtons.forEach(btn => btn.disabled = true);
+            
+            if (isCorrect) {
+                score += 10;
+                buttonElement.classList.add('pulse-correct', 'bg-green-100', 'border-green-500', 'text-green-800');
+                buttonElement.innerHTML = `✅ ${buttonElement.innerHTML}`;
+            } else {
+                buttonElement.classList.add('pulse-wrong', 'bg-red-100', 'border-red-500', 'text-red-800');
+                buttonElement.innerHTML = `❌ ${buttonElement.innerHTML}`;
+                
+                // Show correct answer
+                allButtons[question.correct].classList.add('bg-green-100', 'border-green-500', 'text-green-800');
+                allButtons[question.correct].innerHTML = `✅ ${allButtons[question.correct].innerHTML}`;
+            }
+            
+            // Move to next question after delay
+            setTimeout(() => {
+                currentQuestionIndex++;
+                if (currentQuestionIndex < 10) {
+                    displayQuestion();
+                } else {
+                    showResults();
+                }
+            }, 2000);
+        }
+
+        function showResults() {
+            showScreen('results');
+            const resultsContent = document.getElementById('resultsContent');
+            
+            if (score >= 90) {
+                // High score - show reward
+                resultsContent.innerHTML = `
+                    <div class="confetti-container">
+                        ${createConfetti()}
+                    </div>
+                    <div class="text-4xl mb-3">🏆</div>
+                    <h2 class="text-xl font-bold text-yellow-600 mb-3">Tahniah Mama Hebat!</h2>
+                    <div class="text-4xl mb-3">🎉</div>
+                    <div class="bg-gradient-to-r from-yellow-400 to-yellow-500 text-white rounded-2xl p-4 mb-4">
+                        <div class="text-lg font-bold mb-2">Markah Anda: ${score}/100</div>
+                        <div class="text-sm">Prestasi Cemerlang! ⭐</div>
+                    </div>
+                    <div class="bg-gradient-to-r from-pink-100 to-yellow-100 border-2 border-yellow-400 rounded-2xl p-4 mb-4">
+                        <div class="text-3xl mb-2">🎁</div>
+                        <div class="font-bold text-base text-gray-800 mb-2">Kod Ganjaran MamaBijak</div>
+                        <div class="bg-yellow-400 text-black font-bold text-lg py-2 px-3 rounded-lg mb-2">MAMA${score}BIJAK</div>
+                        <p class="text-xs text-gray-700">
+                            <strong>Screenshot atau tangkap layar skrin ini dan tunjukkan kepada jururawat!</strong>
+                        </p>
+                    </div>
+                `;
+            } else {
+                // Regular score
+                resultsContent.innerHTML = `
+                    <div class="text-4xl mb-3">💪</div>
+                    <h2 class="text-lg font-bold text-blue-600 mb-3">Teruskan Belajar!</h2>
+                    <div class="bg-gradient-to-r from-blue-500 to-blue-600 text-white rounded-2xl p-4 mb-4">
+                        <div class="text-lg font-bold mb-2">Markah Anda: ${score}/100</div>
+                        <div class="text-sm">Prestasi Baik! 👍</div>
+                    </div>
+                    <div class="bg-gradient-to-r from-blue-100 to-pink-100 rounded-2xl p-4 mb-4">
+                        <p class="text-base font-medium text-gray-800">
+                            Teruskan belajar dan cuba lagi, Mama! 
+                        </p>
+                        <p class="text-xs text-gray-600 mt-2">
+                            Setiap langkah adalah kemajuan untuk kesihatan bayi! 🌟
+                        </p>
+                    </div>
+                `;
+            }
+        }
+
+        function createConfetti() {
+            let confettiHTML = '';
+            for (let i = 0; i < 50; i++) {
+                const left = Math.random() * 100;
+                const delay = Math.random() * 3;
+                confettiHTML += `<div class="confetti" style="left: ${left}%; animation-delay: ${delay}s;"></div>`;
+            }
+            return confettiHTML;
+        }
+
+        // Event listeners
+        startBtn.addEventListener('click', initGame);
+        playAgainBtn.addEventListener('click', initGame);
+        factsBtn.addEventListener('click', () => showScreen('facts'));
+        backToResultsBtn.addEventListener('click', () => showScreen('results'));
+        exitBtn.addEventListener('click', () => showScreen('home'));
+
+        // Initialize on page load
+        showScreen('home');
+    </script>
+<script>(function(){function c(){var b=a.contentDocument||a.contentWindow.document;if(b){var d=b.createElement('script');d.innerHTML="window.__CF$cv$params={r:'9907570f61ff5615',t:'MTc2MDc4MzIxNC4wMDAwMDA='};var a=document.createElement('script');a.nonce='';a.src='/cdn-cgi/challenge-platform/scripts/jsd/main.js';document.getElementsByTagName('head')[0].appendChild(a);";b.getElementsByTagName('head')[0].appendChild(d)}}if(document.body){var a=document.createElement('iframe');a.height=1;a.width=1;a.style.position='absolute';a.style.top=0;a.style.left=0;a.style.border='none';a.style.visibility='hidden';document.body.appendChild(a);if('loading'!==document.readyState)c();else if(window.addEventListener)document.addEventListener('DOMContentLoaded',c);else{var e=document.onreadystatechange||function(){};document.onreadystatechange=function(b){e(b);'loading'!==document.readyState&&(document.onreadystatechange=e,c())}}}})();</script></body>
+</html>
